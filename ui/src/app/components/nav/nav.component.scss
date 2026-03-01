@@ -1,0 +1,51 @@
+:host {
+  display: block;
+}
+
+.navbar {
+  background: #1a1a2e;
+  color: white;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.brand-icon {
+  font-size: 1.4rem;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 8px;
+
+  a {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &:hover,
+    &.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+}

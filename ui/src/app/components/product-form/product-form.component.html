@@ -1,0 +1,191 @@
+<div class="form-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <button type="button" class="back-btn" (click)="goBack()" aria-label="Back to products">
+      ← Back
+    </button>
+    <h1 class="page-title">
+      {{ isEditMode ? 'Edit Product' : 'Add Product' }}
+    </h1>
+  </div>
+
+  <!-- Load Error -->
+  @if (loadError) {
+    <div class="alert alert-error" role="alert">
+      ⚠️ {{ loadError }}
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading-overlay" role="status" aria-live="polite">
+      <div class="spinner"></div>
+      <span>Loading product...</span>
+    </div>
+  }
+
+  <!-- Form Card -->
+  <div class="form-card" [class.disabled]="loading">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+
+      <!-- Name -->
+      <div class="form-group">
+        <label for="name" class="form-label">
+          Name <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          class="form-control"
+          [class.is-invalid]="getError('name', 'required') || getError('name', 'maxlength')"
+          formControlName="name"
+          placeholder="e.g. Wireless Keyboard"
+        />
+        @if (getError('name', 'required')) {
+          <span class="field-error" role="alert">Name is required.</span>
+        }
+        @if (getError('name', 'maxlength')) {
+          <span class="field-error" role="alert">Name must not exceed 200 characters.</span>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description" class="form-label">Description</label>
+        <textarea
+          id="description"
+          class="form-control form-textarea"
+          formControlName="description"
+          placeholder="Optional product description"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- SKU -->
+      <div class="form-group">
+        <label for="sku" class="form-label">
+          SKU <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="sku"
+          type="text"
+          class="form-control"
+          [class.is-invalid]="getError('sku', 'required') || getError('sku', 'pattern')"
+          formControlName="sku"
+          placeholder="e.g. WKB-001"
+        />
+        @if (getError('sku', 'required')) {
+          <span class="field-error" role="alert">SKU is required.</span>
+        }
+        @if (getError('sku', 'pattern')) {
+          <span class="field-error" role="alert">SKU may only contain letters, numbers, and hyphens.</span>
+        }
+      </div>
+
+      <!-- Price & Quantity -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="price" class="form-label">
+            Price (R) <span class="required" aria-hidden="true">*</span>
+          </label>
+          <div class="input-prefix-wrapper">
+            <span class="input-prefix" aria-hidden="true">R</span>
+            <input
+              id="price"
+              type="number"
+              class="form-control with-prefix"
+              [class.is-invalid]="getError('price', 'required') || getError('price', 'min')"
+              formControlName="price"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          @if (getError('price', 'required')) {
+            <span class="field-error" role="alert">Price is required.</span>
+          }
+          @if (getError('price', 'min')) {
+            <span class="field-error" role="alert">Price must be 0 or greater.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="quantity" class="form-label">
+            Quantity <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="quantity"
+            type="number"
+            class="form-control"
+            [class.is-invalid]="getError('quantity', 'required') || getError('quantity', 'min')"
+            formControlName="quantity"
+            placeholder="0"
+            step="1"
+            min="0"
+          />
+          @if (getError('quantity', 'required')) {
+            <span class="field-error" role="alert">Quantity is required.</span>
+          }
+          @if (getError('quantity', 'min')) {
+            <span class="field-error" role="alert">Quantity must be 0 or greater.</span>
+          }
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label for="categoryId" class="form-label">
+          Category <span class="required" aria-hidden="true">*</span>
+        </label>
+        <select
+          id="categoryId"
+          class="form-control"
+          [class.is-invalid]="getError('categoryId', 'required')"
+          formControlName="categoryId"
+        >
+          <option value="">— Select a category —</option>
+          @for (cat of categories$ | async; track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+        @if (getError('categoryId', 'required')) {
+          <span class="field-error" role="alert">Category is required.</span>
+        }
+      </div>
+
+      <!-- Submit Error -->
+      @if (submitError) {
+        <div class="alert alert-error" role="alert">
+          ⚠️ {{ submitError }}
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="goBack()"
+          [disabled]="submitting"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="form.invalid || submitting || loading"
+          [title]="form.invalid ? 'Please fill in all required fields correctly' : ''"
+        >
+          @if (submitting) {
+            <span class="btn-spinner" aria-hidden="true"></span>
+            Saving...
+          } @else {
+            {{ isEditMode ? 'Save Changes' : 'Add Product' }}
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+# --------------------
+# .NET
+# --------------------
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+appsettings.Development.json
+
+# --------------------
+# Angular / Node
+# --------------------
+node_modules/
+dist/
+.angular/
+coverage/
+*.js.map
+.env
+
+# --------------------
+# VS Code
+# --------------------
+.vscode/
+
+# --------------------
+# OS
+# --------------------
+.DS_Store
+Thumbs.db

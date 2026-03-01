@@ -1,0 +1,25 @@
+<div class="search-container">
+  <span class="search-icon" aria-hidden="true">🔍</span>
+
+  <input
+    type="text"
+    class="search-input"
+    [placeholder]="placeholder"
+    [(ngModel)]="searchValue"
+    (ngModelChange)="onInputChange($event)"
+    (keyup.escape)="clear()"
+    aria-label="Search"
+    autocomplete="off"
+  />
+
+  <button
+    *ngIf="searchValue"
+    class="clear-btn"
+    (click)="clear()"
+    title="Clear search"
+    type="button"
+    aria-label="Clear search"
+  >
+    ✕
+  </button>
+</div>

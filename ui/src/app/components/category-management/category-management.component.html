@@ -1,0 +1,190 @@
+<div class="page-header">
+  <h1 class="page-title">Category Management</h1>
+</div>
+
+<div class="content-grid">
+
+  <!-- ── Category Tree ──────────────────────────────────────────────────── -->
+  <div class="panel panel-tree">
+    <h2 class="panel-title">Category Tree</h2>
+
+    @if (treeLoading) {
+      <div class="loading-container" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+      </div>
+    }
+
+    @if (treeError) {
+      <div class="alert alert-error" role="alert">⚠️ {{ treeError }}</div>
+    }
+
+    @if (deleteError) {
+      <div class="alert alert-error" role="alert">⚠️ {{ deleteError }}</div>
+    }
+
+    @if (!treeLoading && !treeError) {
+      @if (treeNodes.length === 0) {
+        <div class="empty-text">No categories yet. Add one →</div>
+      } @else {
+        <div class="tree" role="tree">
+          @for (node of treeNodes; track node.id) {
+            <ng-container
+              *ngTemplateOutlet="treeNode; context: { node: node, depth: 0 }"
+            ></ng-container>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <!-- ── Add / Edit Form ────────────────────────────────────────────────── -->
+  <div class="panel panel-form">
+    <h2 class="panel-title">
+      {{ isEditMode ? 'Edit Category' : 'Add Category' }}
+    </h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Name -->
+      <div class="form-group">
+        <label for="cat-name" class="form-label">
+          Name <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="cat-name"
+          type="text"
+          class="form-control"
+          [class.is-invalid]="form.get('name')?.touched && form.get('name')?.errors?.['required']"
+          formControlName="name"
+          placeholder="Category name"
+        />
+        @if (form.get('name')?.touched && form.get('name')?.errors?.['required']) {
+          <span class="field-error" role="alert">Name is required.</span>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="cat-desc" class="form-label">Description</label>
+        <input
+          id="cat-desc"
+          type="text"
+          class="form-control"
+          formControlName="description"
+          placeholder="Optional description"
+        />
+      </div>
+
+      <!-- Parent Category -->
+      <div class="form-group">
+        <label for="cat-parent" class="form-label">Parent Category</label>
+        <select
+          id="cat-parent"
+          class="form-control"
+          formControlName="parentCategoryId"
+        >
+          <option [ngValue]="null">None (root category)</option>
+          @for (cat of categories$ | async; track cat.id) {
+            <!-- Hide the category being edited from its own parent options -->
+            @if (cat.id !== editingId) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          }
+        </select>
+      </div>
+
+      @if (submitError) {
+        <div class="alert alert-error" role="alert">⚠️ {{ submitError }}</div>
+      }
+
+      <!-- Actions -->
+      <div class="form-actions">
+        @if (isEditMode) {
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelEdit()"
+            [disabled]="submitting"
+          >
+            Cancel
+          </button>
+        }
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="submitting || form.invalid"
+          [title]="form.invalid ? 'Please enter a category name' : ''"
+        >
+          @if (submitting) {
+            <span class="btn-spinner" aria-hidden="true"></span>
+            {{ isEditMode ? 'Updating...' : 'Adding...' }}
+          } @else {
+            {{ isEditMode ? 'Save Changes' : 'Add Category' }}
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- ── Recursive Tree Node Template ─────────────────────────────────────── -->
+<ng-template #treeNode let-node="node" let-depth="depth">
+  <div
+    class="tree-node"
+    [class.tree-node-editing]="editingId === node.id"
+    [style.padding-left.px]="depth * 20 + 12"
+    role="treeitem"
+  >
+    <span class="tree-icon" aria-hidden="true">
+      {{ node.children.length > 0 ? '📁' : '📄' }}
+    </span>
+    <div class="tree-content">
+      <span class="tree-name">{{ node.name }}</span>
+      @if (node.description) {
+        <span class="tree-desc"> — {{ node.description }}</span>
+      }
+    </div>
+    <div class="tree-actions">
+      <button
+        type="button"
+        class="btn-icon-sm"
+        (click)="startEdit(node)"
+        title="Edit category"
+        [attr.aria-label]="'Edit ' + node.name"
+      >✏️</button>
+      <button
+        type="button"
+        class="btn-icon-sm btn-icon-danger"
+        (click)="promptDelete(node)"
+        title="Delete category"
+        [attr.aria-label]="'Delete ' + node.name"
+      >🗑️</button>
+    </div>
+  </div>
+
+  @for (child of node.children; track child.id) {
+    <ng-container
+      *ngTemplateOutlet="treeNode; context: { node: child, depth: depth + 1 }"
+    ></ng-container>
+  }
+</ng-template>
+
+<!-- ── Confirm Delete Dialog ─────────────────────────────────────────────── -->
+<app-confirm-dialog
+  [isOpen]="showDeleteDialog"
+  title="Delete Category"
+  [message]="deleteMessage"
+  confirmLabel="Delete"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
+
+<!-- ── Toast ─────────────────────────────────────────────────────────────── -->
+@if (toastMessage) {
+  <div class="toast toast-success" role="status" aria-live="polite">
+    ✓ {{ toastMessage }}
+  </div>
+}

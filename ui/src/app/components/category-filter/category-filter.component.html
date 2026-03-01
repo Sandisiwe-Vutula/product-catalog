@@ -1,0 +1,17 @@
+<div class="filter-container">
+  <label class="filter-label" for="category-select">Category</label>
+
+  <select
+    id="category-select"
+    class="filter-select"
+    [(ngModel)]="selectedId"
+    (ngModelChange)="onChange($event)"
+    aria-label="Filter by category"
+  >
+    <option [ngValue]="null">All Categories</option>
+
+    @for (cat of categories$ | async; track cat.id) {
+      <option [value]="cat.id">{{ cat.name }}</option>
+    }
+  </select>
+</div>

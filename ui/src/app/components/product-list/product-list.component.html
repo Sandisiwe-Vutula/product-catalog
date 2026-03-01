@@ -1,0 +1,160 @@
+<div class="page-header">
+  <h1 class="page-title">Products</h1>
+  <button class="btn btn-primary" (click)="addProduct()" type="button">
+    + Add Product
+  </button>
+</div>
+
+<!-- Filters Row -->
+<div class="filters-row">
+  <app-search-bar
+    [initialValue]="query.search || ''"
+    (searchChange)="onSearchChange($event)"
+    class="search-flex"
+  />
+
+  <app-category-filter
+    [selectedCategoryId]="query.categoryId ?? null"
+    (categoryChange)="onCategoryChange($event)"
+  />
+
+  <div class="filter-container">
+    <label class="filter-label" for="stock-filter">Stock</label>
+    <select id="stock-filter" class="filter-select" (change)="onStockChange($event)">
+      <option value="">All</option>
+      <option value="true">In Stock</option>
+      <option value="false">Out of Stock</option>
+    </select>
+  </div>
+
+  <div class="filter-container">
+    <label class="filter-label" for="sort-filter">Sort By</label>
+    <select id="sort-filter" class="filter-select" (change)="onSortChange($event)">
+      <option value="name">Name</option>
+      <option value="price">Price</option>
+      <option value="quantity">Quantity</option>
+      <option value="createdat">Date Added</option>
+    </select>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (loading) {
+  <div class="loading-container" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>Loading products...</span>
+  </div>
+}
+
+<!-- Error Banner -->
+@if (error) {
+  <div class="error-banner" role="alert">
+    <span>⚠️ {{ error }}</span>
+    <button type="button" (click)="reload()">Retry</button>
+  </div>
+}
+
+<!-- Product Grid -->
+@if (!loading && !error) {
+
+  @if (products.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon" aria-hidden="true">📭</div>
+      <h3>No products found</h3>
+      <p>Try adjusting your search or filters.</p>
+    </div>
+  } @else {
+
+    <div class="product-grid">
+      @for (product of products; track product.id) {
+        <article class="product-card">
+          <div class="card-header">
+            <span class="sku-badge">{{ product.sku }}</span>
+            <span
+              class="stock-badge"
+              [class.in-stock]="product.inStock"
+              [class.out-stock]="!product.inStock"
+            >
+              {{ product.inStock ? 'In Stock' : 'Out of Stock' }}
+            </span>
+          </div>
+
+          <h3 class="product-name">{{ product.name }}</h3>
+          <p class="product-desc">{{ product.description || 'No description' }}</p>
+
+          <div class="product-meta">
+            <span class="category-tag">
+              {{ product.categoryName || 'Uncategorized' }}
+            </span>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-qty">
+              <span class="price">{{ product.price | currency:'ZAR':'symbol-narrow':'1.2-2' }}</span>
+              <span class="qty">Qty: {{ product.quantity | number }}</span>
+            </div>
+
+            <div class="card-actions">
+              <button
+                type="button"
+                class="btn-icon"
+                (click)="editProduct(product)"
+                title="Edit product"
+                [attr.aria-label]="'Edit ' + product.name"
+              >✏️</button>
+              <button
+                type="button"
+                class="btn-icon btn-icon-danger"
+                (click)="promptDelete(product)"
+                title="Delete product"
+                [attr.aria-label]="'Delete ' + product.name"
+              >🗑️</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <nav class="pagination" aria-label="Product pagination">
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="query.page! <= 1"
+          (click)="changePage(query.page! - 1)"
+          aria-label="Previous page"
+        >‹ Prev</button>
+
+        <span class="page-info">
+          Page {{ query.page }} of {{ totalPages }} ({{ totalCount }} items)
+        </span>
+
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="query.page! >= totalPages"
+          (click)="changePage(query.page! + 1)"
+          aria-label="Next page"
+        >Next ›</button>
+      </nav>
+    }
+  }
+}
+
+<!-- Confirm Delete Dialog -->
+<app-confirm-dialog
+  [isOpen]="showDeleteDialog"
+  title="Delete Product"
+  [message]="deleteMessage"
+  confirmLabel="Delete"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()"
+/>
+
+<!-- Success Toast -->
+@if (successMessage) {
+  <div class="toast toast-success" role="status" aria-live="polite">
+    ✓ {{ successMessage }}
+  </div>
+}

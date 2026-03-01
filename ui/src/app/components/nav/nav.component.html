@@ -1,0 +1,19 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <span class="brand-icon">📦</span>
+    <span class="brand-name">Product Catalog</span>
+  </div>
+
+  <div class="navbar-links">
+    <a
+      routerLink="/products"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: false }"
+    >
+      Products
+    </a>
+    <a routerLink="/categories" routerLinkActive="active">
+      Categories
+    </a>
+  </div>
+</nav>
